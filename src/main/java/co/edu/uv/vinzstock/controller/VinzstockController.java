@@ -136,10 +136,33 @@ public class VinzstockController {
         return this.rolService.findAllRoles();
     }
 
+
+
     @GetMapping(path = "/productos/all")
     public List<ProductoModel> findAllProductos(){
         return this.productoService.findAllProductos();
     }
+
+    @PostMapping(path = "/producto/save")
+    public ResponseEntity<Map<String, Object>> saveProducto(@RequestBody ProductoModel productoModel){
+        try {
+            ProductoModel nuevoProducto = this.productoService.createProducto(productoModel);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Producto creado exitosamente");
+            response.put("data", nuevoProducto);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch(RuntimeException e){
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
 
     @GetMapping(path = "/inventarios/all")
     public List<InventarioModel> findAllInventarios(){
