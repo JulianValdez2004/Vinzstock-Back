@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/vinzstock")
@@ -144,6 +145,36 @@ public class VinzstockController {
     @GetMapping(path = "/inventarios/all")
     public List<InventarioModel> findAllInventarios(){
         return this.inventarioService.findAllInventarios();
+    }
+
+
+    // Endpoint para recuperación de contraseña
+    @PostMapping("/recover-password")
+    public ResponseEntity<?> recoverPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+
+        // Validar si el correo existe
+        Optional<UsuarioModel> userOpt = usuarioService.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "El correo no está registrado."));
+        }
+
+        UsuarioModel user = userOpt.get();
+
+        // Validar que el rol sea Administrador o Cajero
+        String rolNombre = user.getRol().getNombre(); // asumimos que el Rol tiene un nombre
+        if (!rolNombre.equalsIgnoreCase("Administrador") && !rolNombre.equalsIgnoreCase("Cajero")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "No tienes permisos para recuperar contraseña."));
+        }
+
+        String password = user.getContrasena();
+
+        // Enviar el correo con la contraseña
+        usuarioService.sendPasswordByEmail(email, password);
+
+        return ResponseEntity.ok(Map.of("message", "Se ha enviado un correo a " + email));
     }
 
 }

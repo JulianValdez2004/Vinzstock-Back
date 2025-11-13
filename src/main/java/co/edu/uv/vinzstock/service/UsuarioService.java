@@ -7,6 +7,8 @@ import co.edu.uv.vinzstock.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.stereotype.Service;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,11 +18,13 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final RolRespository rolRepository;
+    private final JavaMailSender mailSender;
 
     @Autowired
-    public UsuarioService (UsuarioRepository usuarioRepository, RolRespository rolRespository){
+    public UsuarioService (UsuarioRepository usuarioRepository, RolRespository rolRespository, JavaMailSender mailSender){
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRespository;
+        this.mailSender = mailSender;
     }
 
     public UsuarioModel authenticateUsuario(String usuarioLogin, String contrasena) {
@@ -106,4 +110,25 @@ public class UsuarioService {
         return this.usuarioRepository.findAllByIdUsuario(idUsuario);
     }
 
+    public Optional<UsuarioModel> findByEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
+    public boolean existsByEmail(String email) {
+        return usuarioRepository.existsByEmail(email);
+    }
+
+    public void sendPasswordByEmail(String toEmail, String password) {
+        // Fuerza el protocolo TLS correcto
+        System.setProperty("mail.smtp.ssl.trust", "smtp.gmail.com");
+        System.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Recuperación de contraseña - Vinzstock");
+        message.setText("Hola,\n\nTu contraseña actual es: " + password +
+                "\n\nRecuerda mantenerla segura.\n\nVinzstock");
+
+        mailSender.send(message);
+    }
 }
