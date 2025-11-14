@@ -17,9 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/vinzstock")
@@ -47,10 +49,7 @@ public class VinzstockController {
         this.jwtUtil = jwtUtil;
     }
 
-    // ========================================
-    // ENDPOINTS DE AUTENTICACIÓN
-    // ========================================
-
+    // ENDPOINT DE LOGIN CON JWT
     @PostMapping(path = "/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -59,12 +58,14 @@ public class VinzstockController {
                     loginRequest.getPassword()
             );
 
+            // Generar token JWT
             String token = jwtUtil.generateToken(
                     usuario.getUsuarioLogin(),
                     usuario.getIdUsuario(),
                     usuario.getRol().getNombre()
             );
 
+            // Crear DTO con la información del usuario
             UsuarioDTO usuarioDTO = new UsuarioDTO(
                     usuario.getIdUsuario(),
                     usuario.getNombre(),
@@ -88,15 +89,12 @@ public class VinzstockController {
         }
     }
 
-    // ========================================
-    // ENDPOINTS DE USUARIOS
-    // ========================================
-
     @PostMapping(path = "/save")
-    public ResponseEntity<Map<String, Object>> saveUsuario(@RequestBody UsuarioModel usuarioModel){
+    public ResponseEntity saveUsuario(@RequestBody UsuarioModel usuarioModel){
         try {
             UsuarioModel nuevoUsuario = this.usuarioService.createUsuario(usuarioModel);
 
+            // Respuesta exitosa
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Usuario creado exitosamente");
@@ -104,6 +102,7 @@ public class VinzstockController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch(RuntimeException e){
+            // Capturar el error y devolverlo en formato JSON
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", e.getMessage());
@@ -273,4 +272,35 @@ public class VinzstockController {
     public List<InventarioModel> findAllInventarios(){
         return this.inventarioService.findAllInventarios();
     }
+
+
+    // Endpoint para recuperación de contraseña
+    @PostMapping("/recover-password")
+    public ResponseEntity<?> recoverPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+
+        // Validar si el correo existe
+        Optional<UsuarioModel> userOpt = usuarioService.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "El correo no está registrado."));
+        }
+
+        UsuarioModel user = userOpt.get();
+
+        // Validar que el rol sea Administrador o Cajero
+        String rolNombre = user.getRol().getNombre(); // asumimos que el Rol tiene un nombre
+        if (!rolNombre.equalsIgnoreCase("Administrador") && !rolNombre.equalsIgnoreCase("Cajero")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "No tienes permisos para recuperar contraseña."));
+        }
+
+        String password = user.getContrasena();
+
+        // Enviar el correo con la contraseña
+        usuarioService.sendPasswordByEmail(email, password);
+
+        return ResponseEntity.ok(Map.of("message", "Se ha enviado un correo a " + email));
+    }
+
 }
