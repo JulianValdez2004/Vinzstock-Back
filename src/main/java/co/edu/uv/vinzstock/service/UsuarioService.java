@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,22 +24,58 @@ public class UsuarioService {
         this.rolRepository = rolRespository;
     }
 
+    private static final int MAX_INTENTOS = 5;
+    private static final int MAX_BLOQUEOS = 3;
+    private static final int MINUTOS_BLOQUEO = 1; // Cambia este valor para pruebas
+
     public UsuarioModel authenticateUsuario(String usuarioLogin, String contrasena) {
-        Optional<UsuarioModel> usuario = usuarioRepository.findByUsuarioLoginAndContrasena(usuarioLogin, contrasena);
+        Optional<UsuarioModel> usuarioOpt = usuarioRepository.findByUsuarioLogin(usuarioLogin);
 
-        if (usuario.isPresent()) {
-            UsuarioModel user = usuario.get();
-
-            // Verificar si el usuario está activo
-            if (!user.isEstado()) {
-                throw new RuntimeException("Usuario inactivo, por favor comuniquese con el administrador.");
-            }
-
-            return user;
-        } else {
+        if (usuarioOpt.isEmpty()) {
             throw new RuntimeException("Usuario o contraseña incorrectos");
         }
+
+        UsuarioModel usuario = usuarioOpt.get();
+
+        if (!usuario.isEstado()) {
+            throw new RuntimeException("Usuario inactivo, por favor comuníquese con el administrador.");
+        }
+
+        if (usuario.isBloqueoPermanente()) {
+            throw new RuntimeException("Sistema bloqueado permanentemente. Contacta con un desarrollador.");
+        }
+
+        if (usuario.getBloqueadoHasta() != null && usuario.getBloqueadoHasta().isAfter(LocalDateTime.now())) {
+            throw new RuntimeException("Inicio de sesión bloqueado temporalmente. Inténtalo más tarde.");
+        }
+
+        if (!usuario.getContrasena().equals(contrasena)) {
+            usuario.setIntentosFallidos(usuario.getIntentosFallidos() + 1);
+
+            if (usuario.getIntentosFallidos() >= MAX_INTENTOS) {
+                usuario.setBloqueadoHasta(LocalDateTime.now().plusMinutes(MINUTOS_BLOQUEO));
+                usuario.setIntentosFallidos(0);
+                usuario.setCantidadBloqueos(usuario.getCantidadBloqueos() + 1);
+
+                if (usuario.getCantidadBloqueos() >= MAX_BLOQUEOS) {
+                    usuario.setBloqueoPermanente(true);
+                }
+            }
+
+            usuarioRepository.save(usuario);
+            throw new RuntimeException("Usuario o contraseña incorrectos");
+        }
+
+        // Login exitoso
+        usuario.setIntentosFallidos(0);
+        usuario.setCantidadBloqueos(0);
+        usuario.setBloqueadoHasta(null);
+        usuario.setBloqueoPermanente(false);
+        usuarioRepository.save(usuario);
+
+        return usuario;
     }
+
 
 
     public class UsuarioDuplicadoException extends RuntimeException {
