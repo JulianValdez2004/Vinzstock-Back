@@ -25,7 +25,7 @@ public class ProductoModel {
     private String descripcion;
 
     @Column (name = "PRECIO_VENTA")
-    private long precioVenta;
+    private Long precioVenta;
 
     @Column (name = "IVA")
     private long iva;

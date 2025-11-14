@@ -5,6 +5,8 @@ import co.edu.uv.vinzstock.model.ProductoModel;
 import co.edu.uv.vinzstock.model.UsuarioModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
 
 import java.util.List;
 
@@ -19,4 +21,10 @@ public interface ProductoRepository extends JpaRepository <ProductoModel, Long> 
     boolean existsByNombre(String nombre);
 
     List<ProductoModel> findAllByNombreContains(String nombre);
+
+    boolean existsByNombreIgnoreCase(String nombre);
+
+    Optional<ProductoModel> findByNombreIgnoreCase(String nombre);
+
+    List<ProductoModel> findByNombreContainingIgnoreCase(String nombre);
 }
