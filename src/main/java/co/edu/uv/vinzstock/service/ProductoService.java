@@ -27,27 +27,6 @@ public class ProductoService {
         }
     }
 
-    /*public ProductoModel createProducto (ProductoModel productoModel){
-
-        if (productoRepository.existsByNombre(productoModel.getNombre())){
-            throw new ProductoService.ProductoDuplicadoException("nombre", productoModel.getNombre());
-        }
-
-        return this.productoRepository.save(productoModel);
-    }*/
-
-    /*public ProductoModel updateProducto(ProductoModel productoModel){
-
-        if (productoModel.getRol() != null && usuarioModel.getRol().getIdRol() > 0) {
-            Long idRol = usuarioModel.getRol().getIdRol();
-
-            RolesModel rol = rolRepository.findById(idRol)
-                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + idRol));
-
-            usuarioModel.setRol(rol);
-        }
-        return this.usuarioRepository.save(usuarioModel);
-    }*/
 
 
 
