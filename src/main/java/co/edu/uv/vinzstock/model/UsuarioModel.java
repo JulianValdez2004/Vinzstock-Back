@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @Data
@@ -37,6 +38,19 @@ public class UsuarioModel {
 
     @Column (name ="CONTRASENA")
     private String contrasena;
+
+    @Column(name = "INTENTOS_FALLIDOS")
+    private int intentosFallidos;
+
+    @Column(name = "BLOQUEADO_HASTA")
+    private LocalDateTime bloqueadoHasta;
+
+    @Column(name = "CANTIDAD_BLOQUEOS")
+    private int cantidadBloqueos;
+
+    @Column(name = "BLOQUEO_PERMANENTE")
+    private boolean bloqueoPermanente;
+
 
 
     @CreationTimestamp
