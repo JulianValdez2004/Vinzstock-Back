@@ -13,6 +13,11 @@ import lombok.*;
 public class ProductosProveedoresModel {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column (name = "ID_PRODUCTOS_PROVEEDORES")
+    private long idProductoProveedores;
+
+
     @ManyToOne
     @JoinColumn  (name = "ID_PROVEEDOR")
     private ProveedoresModel idProveedor;

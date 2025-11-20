@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface ProductosProveedoresRepository extends JpaRepository<ProductosProveedoresModel, Long> {
 
-    List <ProductosProveedoresModel> findAllByIdProveedor(long idProveedor);
+    List<ProductosProveedoresModel> findAllByIdProductoProveedores(long idProductoProveedores);
 }

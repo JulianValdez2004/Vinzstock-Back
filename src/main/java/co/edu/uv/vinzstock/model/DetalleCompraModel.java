@@ -13,6 +13,10 @@ import lombok.*;
 public class DetalleCompraModel {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_DETALLE_COMPRA", unique = true)
+    private long idDetalleCompra;
+
     @ManyToOne
     @JoinColumn (name = "ID_COMPRA")
     private ComprasModel idCompra;
