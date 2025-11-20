@@ -37,7 +37,7 @@ public class ProveedoresService {
     }
 
     public List<ProveedoresModel> findByNombreCompaniaContaining(String nombre) {
-        return proveedoresRepository.findByNombreCompaniaContainingIgnoreCase(nombre);
+        return proveedoresRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
 
@@ -55,8 +55,8 @@ public class ProveedoresService {
             throw new ProveedorDuplicadoException("email", proveedor.getEmail());
         }
 
-        if (existsByNombreCompania(proveedor.getNombreCompania())) {
-            throw new ProveedorDuplicadoException("nombre de la compañía", proveedor.getNombreCompania());
+        if (existsByNombreCompania(proveedor.getNombre())) {
+            throw new ProveedorDuplicadoException("nombre de la compañía", proveedor.getNombre());
         }
 
         return proveedoresRepository.save(proveedor);
@@ -92,25 +92,25 @@ public class ProveedoresService {
         }
 
         // Si cambia el nombre compañía → validar duplicado
-        if (!existente.getNombreCompania().equalsIgnoreCase(proveedor.getNombreCompania())) {
-            if (proveedoresRepository.existsByNombreCompaniaIgnoreCase(proveedor.getNombreCompania())) {
+        if (!existente.getNombre().equalsIgnoreCase(proveedor.getNombre())) {
+            if (proveedoresRepository.existsByNombreIgnoreCase(proveedor.getNombre())) {
                 throw new ProveedorDuplicadoException(
                         "nombre de la compañía",
-                        proveedor.getNombreCompania()
+                        proveedor.getNombre()
                 );
             }
         }
 
         // Actualizar campos
-        existente.setNombreCompania(proveedor.getNombreCompania());
+        existente.setNombre(proveedor.getNombre());
         existente.setNitFiscal(proveedor.getNitFiscal());
         existente.setEmail(proveedor.getEmail());
-        existente.setNumeroContacto(proveedor.getNumeroContacto());
+        existente.setTelefono(proveedor.getTelefono());
 
         return proveedoresRepository.save(existente);
     }
     public boolean existsByNombreCompania(String nombre) {
-        return proveedoresRepository.existsByNombreCompaniaIgnoreCase(nombre);
+        return proveedoresRepository.existsByNombreIgnoreCase(nombre);
     }
 
     public boolean existsByEmail(String email) {

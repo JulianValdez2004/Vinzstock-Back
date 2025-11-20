@@ -11,21 +11,13 @@ public class ProveedorDTO {
 
     private long idProveedor;
 
-    private String nombreCompania;
+    private String nombre;
 
-    private String numeroContacto;
+    private String telefono;
 
-    private String tipoIdentificacion;
 
     private String nitFiscal;
 
     private String email;
 
-    private String productoNombre;
-
-    private String productoDescripcion;
-
-    private String formaPago;
-
-    private String fechaPedido;
 }

@@ -15,9 +15,9 @@ public interface ProveedoresRepository extends JpaRepository <ProveedoresModel, 
     List <ProveedoresModel> findAllByIdProveedor(long idProveedor);
 
     // --- BÚSQUEDAS BÁSICAS ---
-    List<ProveedoresModel> findAllByNombreCompania(String nombreCompania);
+    List<ProveedoresModel> findAllByNombre(String nombre);
 
-    List<ProveedoresModel> findByNombreCompaniaContainingIgnoreCase(String nombreCompania);
+    List<ProveedoresModel> findByNombreContainingIgnoreCase(String nombre);
 
     Optional<ProveedoresModel> findByNitFiscal(String nitFiscal);
 
@@ -28,5 +28,5 @@ public interface ProveedoresRepository extends JpaRepository <ProveedoresModel, 
 
     boolean existsByEmail(String email);
 
-    boolean existsByNombreCompaniaIgnoreCase(String nombreCompania);
+    boolean existsByNombreIgnoreCase(String nombre);
 }
