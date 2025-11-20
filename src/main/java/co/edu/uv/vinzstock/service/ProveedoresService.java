@@ -47,27 +47,20 @@ public class ProveedoresService {
 
     public ProveedoresModel createProveedor(ProveedoresModel proveedor) {
 
-        // Validar duplicado NIT/RUC
-        if (proveedoresRepository.existsByNitFiscal(proveedor.getNitFiscal())) {
-            throw new ProveedorDuplicadoException(
-                    "número de identificación",
-                    proveedor.getNitFiscal()
-            );
+        if (existsByNitFiscal(proveedor.getNitFiscal())) {
+            throw new ProveedorDuplicadoException("número de identificación", proveedor.getNitFiscal());
         }
 
-        // Validar email duplicado
-        if (proveedoresRepository.existsByEmail(proveedor.getEmail())) {
+        if (existsByEmail(proveedor.getEmail())) {
             throw new ProveedorDuplicadoException("email", proveedor.getEmail());
         }
 
-        // Validar nombre compañía duplicado
-        if (proveedoresRepository.existsByNombreCompaniaIgnoreCase(proveedor.getNombreCompania())) {
+        if (existsByNombreCompania(proveedor.getNombreCompania())) {
             throw new ProveedorDuplicadoException("nombre de la compañía", proveedor.getNombreCompania());
         }
 
-        // Guardar proveedor
         return proveedoresRepository.save(proveedor);
-    }
+        }
 
 
     // ----------------------------------------------------------------
@@ -115,6 +108,17 @@ public class ProveedoresService {
         existente.setNumeroContacto(proveedor.getNumeroContacto());
 
         return proveedoresRepository.save(existente);
+    }
+    public boolean existsByNombreCompania(String nombre) {
+        return proveedoresRepository.existsByNombreCompaniaIgnoreCase(nombre);
+    }
+
+    public boolean existsByEmail(String email) {
+        return proveedoresRepository.existsByEmail(email);
+    }
+
+    public boolean existsByNitFiscal(String nit) {
+        return proveedoresRepository.existsByNitFiscal(nit);
     }
 
 }

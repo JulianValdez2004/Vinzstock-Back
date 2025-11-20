@@ -310,6 +310,10 @@ public class VinzstockController {
         return ResponseEntity.ok(Map.of("message", "Se ha enviado un correo a " + email));
     }
 
+    /*
+    ===PROVEEDORES===
+    */
+
     //Crear Proveedor
     @PostMapping("/proveedor/save")
     public ResponseEntity<?> saveProveedor(@RequestBody ProveedoresModel proveedor) {
@@ -377,4 +381,25 @@ public class VinzstockController {
         return ResponseEntity.ok(proveedoresService.findByNombreCompaniaContaining(nombre));
     }
 
+    /* Validar nombre
+    @GetMapping("/proveedor/validar/nombre/{nombre}")
+    public ResponseEntity<Boolean> validarNombre(@PathVariable String nombre) {
+        boolean disponible = !proveedoresService.existsByNombreCompania(nombre);
+        return ResponseEntity.ok(disponible);
+    }
+
+    // Validar email
+    @GetMapping("/proveedor/validar/email/{email}")
+    public ResponseEntity<Boolean> validarEmail(@PathVariable String email) {
+        boolean disponible = !proveedoresService.existsByEmail(email);
+        return ResponseEntity.ok(disponible);
+    }
+
+    // Validar NIT
+    @GetMapping("/proveedor/validar/nit/{nit}")
+    public ResponseEntity<Boolean> validarNit(@PathVariable String nit) {
+        boolean disponible = !proveedoresService.existsByNitFiscal(nit);
+        return ResponseEntity.ok(disponible);
+    }
+    */
 }
