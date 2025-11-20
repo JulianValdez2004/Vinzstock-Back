@@ -12,6 +12,9 @@ import co.edu.uv.vinzstock.service.InventarioService;
 import co.edu.uv.vinzstock.service.ProductoService;
 import co.edu.uv.vinzstock.service.RolService;
 import co.edu.uv.vinzstock.service.UsuarioService;
+import co.edu.uv.vinzstock.model.ProveedoresModel;
+import co.edu.uv.vinzstock.service.ProveedoresService;
+import co.edu.uv.vinzstock.dto.ProveedorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +36,8 @@ public class VinzstockController {
     private final ProductoService productoService;
     private final InventarioService inventarioService;
     private final JwtUtil jwtUtil;
+    private final ProveedoresService proveedoresService;
+
 
     @Autowired
     public VinzstockController(
@@ -40,12 +45,14 @@ public class VinzstockController {
             RolService rolService,
             ProductoService productoService,
             InventarioService inventarioService,
-            JwtUtil jwtUtil
+            JwtUtil jwtUtil,
+            ProveedoresService proveedoresService
     ){
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.productoService = productoService;
         this.inventarioService = inventarioService;
+        this.proveedoresService = proveedoresService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -303,4 +310,99 @@ public class VinzstockController {
         return ResponseEntity.ok(Map.of("message", "Se ha enviado un correo a " + email));
     }
 
+
+
+
+    /*
+    ===PROVEEDORES===
+    */
+
+    //Crear Proveedor
+    @PostMapping("/proveedor/save")
+    public ResponseEntity<?> saveProveedor(@RequestBody ProveedoresModel proveedor) {
+        try {
+            ProveedoresModel nuevo = proveedoresService.createProveedor(proveedor);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "Proveedor registrado exitosamente",
+                    "data", nuevo
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    //Actualizar Proveedor
+    @PutMapping("/proveedor/update")
+    public ResponseEntity<?> updateProveedor(@RequestBody ProveedoresModel proveedor) {
+        try {
+            ProveedoresModel actualizado = proveedoresService.updateProveedor(proveedor);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Proveedor actualizado exitosamente",
+                    "data", actualizado
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+
+    //Listar todos los proveedores:
+    @GetMapping("/proveedores/all")
+    public ResponseEntity<List<ProveedoresModel>> findAllProveedores() {
+        return ResponseEntity.ok(proveedoresService.findAllProveedores());
+    }
+
+    //Obtrener proveedor por id:
+    @GetMapping("/proveedor/{id}")
+    public ResponseEntity<?> findProveedorById(@PathVariable long id) {
+        try {
+            return ResponseEntity.ok(
+                    proveedoresService.findProveedorById(id)
+                            .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"))
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    //Buscar proovedores por nombre:
+    @GetMapping("/proveedor/search")
+    public ResponseEntity<List<ProveedoresModel>> searchByNombre(@RequestParam String nombre) {
+        return ResponseEntity.ok(proveedoresService.findByNombreContaining(nombre));
+    }
+
+    /* Validar nombre
+    @GetMapping("/proveedor/validar/nombre/{nombre}")
+    public ResponseEntity<Boolean> validarNombre(@PathVariable String nombre) {
+        boolean disponible = !proveedoresService.existsByNombreCompania(nombre);
+        return ResponseEntity.ok(disponible);
+    }
+
+    // Validar email
+    @GetMapping("/proveedor/validar/email/{email}")
+    public ResponseEntity<Boolean> validarEmail(@PathVariable String email) {
+        boolean disponible = !proveedoresService.existsByEmail(email);
+        return ResponseEntity.ok(disponible);
+    }
+
+    // Validar NIT
+    @GetMapping("/proveedor/validar/nit/{nit}")
+    public ResponseEntity<Boolean> validarNit(@PathVariable String nit) {
+        boolean disponible = !proveedoresService.existsByNitFiscal(nit);
+        return ResponseEntity.ok(disponible);
+    }
+    */
 }

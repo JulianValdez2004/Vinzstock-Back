@@ -21,13 +21,13 @@ public class ProveedoresModel {
     private String nombre;
 
     @Column (name = "NIT_FISCAL", nullable = false, unique = true)
-    private long nitFiscal;
+    private String nitFiscal;
 
 
-    @Column (name = "TELEFONO", unique = false)
-    private long telefono;
+    @Column (name = "TELEFONO", unique = true)
+    private String telefono;
 
     @Column (name = "EMAIL", nullable = false, unique = true)
-    private long email;
+    private String email;
 
 }
