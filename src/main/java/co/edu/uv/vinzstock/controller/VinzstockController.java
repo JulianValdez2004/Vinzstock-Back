@@ -362,7 +362,7 @@ public class VinzstockController {
         return ResponseEntity.ok(proveedoresService.findAllProveedores());
     }
 
-    //Obtrener proveedor por id:
+    //Obtener proveedor por id:
     @GetMapping("/proveedor/{id}")
     public ResponseEntity<?> findProveedorById(@PathVariable long id) {
         try {

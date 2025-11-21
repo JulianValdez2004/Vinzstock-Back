@@ -69,29 +69,38 @@ public class ProveedoresService {
 
     public ProveedoresModel updateProveedor(ProveedoresModel proveedor) {
 
+        // ✅ 1. Verificar que se envió el ID
+        if (proveedor.getIdProveedor() <= 0) {
+            throw new IllegalArgumentException("El ID del proveedor es obligatorio para actualizar");
+        }
+
+        // Buscar proveedor existente
         ProveedoresModel existente = proveedoresRepository.findById(proveedor.getIdProveedor())
                 .orElseThrow(() ->
                         new RuntimeException("Proveedor no encontrado con ID: " + proveedor.getIdProveedor())
                 );
 
-        // Si cambia el número de identificación → validar duplicado
+        // ✅ 3. Validar NIT solo si cambió
         if (!existente.getNitFiscal().equals(proveedor.getNitFiscal())) {
             if (proveedoresRepository.existsByNitFiscal(proveedor.getNitFiscal())) {
                 throw new ProveedorDuplicadoException(
-                        "número de identificación",
+                        "número de identificación fiscal (NIT)",
                         proveedor.getNitFiscal()
                 );
             }
         }
 
-        // Si cambia email → validar duplicado
+        // ✅ 4. Validar email solo si cambió
         if (!existente.getEmail().equalsIgnoreCase(proveedor.getEmail())) {
             if (proveedoresRepository.existsByEmail(proveedor.getEmail())) {
-                throw new ProveedorDuplicadoException("email", proveedor.getEmail());
+                throw new ProveedorDuplicadoException(
+                        "email",
+                        proveedor.getEmail()
+                );
             }
         }
 
-        // Si cambia el nombre compañía → validar duplicado
+        // ✅ 5. Validar nombre solo si cambió
         if (!existente.getNombre().equalsIgnoreCase(proveedor.getNombre())) {
             if (proveedoresRepository.existsByNombreIgnoreCase(proveedor.getNombre())) {
                 throw new ProveedorDuplicadoException(
@@ -101,12 +110,22 @@ public class ProveedoresService {
             }
         }
 
-        // Actualizar campos
+        // ✅ 6. Validar formato del teléfono si se proporciona
+        if (proveedor.getTelefono() != null && !proveedor.getTelefono().isEmpty()) {
+            if (!proveedor.getTelefono().matches("^\\d{10}$")) {
+                throw new IllegalArgumentException(
+                        "El teléfono debe tener exactamente 10 dígitos numéricos"
+                );
+            }
+        }
+
+        // ✅ 7. Actualizar campos
         existente.setNombre(proveedor.getNombre());
         existente.setNitFiscal(proveedor.getNitFiscal());
         existente.setEmail(proveedor.getEmail());
         existente.setTelefono(proveedor.getTelefono());
 
+        // ✅ 8. Guardar y retornar
         return proveedoresRepository.save(existente);
     }
     public boolean existsByNombre(String nombre) {
