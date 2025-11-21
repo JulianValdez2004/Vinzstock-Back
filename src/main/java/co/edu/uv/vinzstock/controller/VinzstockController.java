@@ -1,20 +1,13 @@
 package co.edu.uv.vinzstock.controller;
 
-import co.edu.uv.vinzstock.dto.LoginRequest;
-import co.edu.uv.vinzstock.dto.LoginResponse;
-import co.edu.uv.vinzstock.dto.UsuarioDTO;
+import co.edu.uv.vinzstock.dto.*;
 import co.edu.uv.vinzstock.model.InventarioModel;
 import co.edu.uv.vinzstock.model.ProductoModel;
 import co.edu.uv.vinzstock.model.RolesModel;
 import co.edu.uv.vinzstock.model.UsuarioModel;
 import co.edu.uv.vinzstock.security.JwtUtil;
-import co.edu.uv.vinzstock.service.InventarioService;
-import co.edu.uv.vinzstock.service.ProductoService;
-import co.edu.uv.vinzstock.service.RolService;
-import co.edu.uv.vinzstock.service.UsuarioService;
+import co.edu.uv.vinzstock.service.*;
 import co.edu.uv.vinzstock.model.ProveedoresModel;
-import co.edu.uv.vinzstock.service.ProveedoresService;
-import co.edu.uv.vinzstock.dto.ProveedorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -405,4 +398,57 @@ public class VinzstockController {
         return ResponseEntity.ok(disponible);
     }
     */
+    // ========================================
+    // ENDPOINTS DE COMPRAS
+    // ========================================
+    @Autowired
+    private CompraService compraService;
+
+    @PostMapping("/compras/registrar")
+    public ResponseEntity<?> registrarCompra(@RequestBody CompraDTO dto) {
+        try {
+            compraService.registrarCompra(dto);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Compra registrada correctamente"
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/productos-proveedor/{idProveedor}")
+    public ResponseEntity<?> obtenerProductosPorProveedor(@PathVariable long idProveedor) {
+        try {
+            List<ProductoDTO> productos = compraService.obtenerProductosPorProveedor(idProveedor);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", productos);
+            response.put("total", productos.size());
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Error interno del servidor");
+            error.put("error", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
+
+
+
 }

@@ -11,5 +11,7 @@ import java.util.List;
 @Repository
 public interface ProductosProveedoresRepository extends JpaRepository<ProductosProveedoresModel, Long> {
 
-    List<ProductosProveedoresModel> findAllByIdProductoProveedores(long idProductoProveedores);
+    boolean existsByIdProveedor_IdProveedorAndIdProducto_IdProducto(long idProveedor, long idProducto);
+
+    List<ProductosProveedoresModel> findByIdProveedor_IdProveedor(long idProveedor);
 }

@@ -23,7 +23,6 @@ public interface ProveedoresRepository extends JpaRepository <ProveedoresModel, 
 
     Optional<ProveedoresModel> findByEmail(String email);
 
-
     boolean existsByNitFiscal(String nitFiscal);
 
     boolean existsByEmail(String email);

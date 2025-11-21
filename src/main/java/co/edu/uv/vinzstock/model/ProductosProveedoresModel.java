@@ -1,29 +1,30 @@
 package co.edu.uv.vinzstock.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
-@Builder
+@Entity
+@Table(name = "TBL_PRODUCTOS_PROVEEDORES")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table (name = "TBL_PRODUCTOS_PROVEEDORES")
 public class ProductosProveedoresModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column (name = "ID_PRODUCTOS_PROVEEDORES")
+    @Column(name = "ID_PRODUCTOS_PROVEEDORES")
     private long idProductoProveedores;
 
-
-    @ManyToOne
-    @JoinColumn  (name = "ID_PROVEEDOR")
+    // ⭐ ESTO ES LO IMPORTANTE: fetch = FetchType.EAGER
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ID_PROVEEDOR")
     private ProveedoresModel idProveedor;
 
-    @ManyToOne
-    @JoinColumn (name = "ID_PRODUCTO")
+    // ⭐ ESTO ES LO IMPORTANTE: fetch = FetchType.EAGER
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ID_PRODUCTO")
     private ProductoModel idProducto;
-
 }
