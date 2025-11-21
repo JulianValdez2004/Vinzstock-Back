@@ -2,14 +2,14 @@ package co.edu.uv.vinzstock.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table (name = "TBL_DETALLES_COMPRAS")
+@Table(name = "TBL_DETALLES_COMPRAS")
 public class DetalleCompraModel {
 
     @Id
@@ -17,22 +17,23 @@ public class DetalleCompraModel {
     @Column(name = "ID_DETALLE_COMPRA", unique = true)
     private long idDetalleCompra;
 
-    @ManyToOne
-    @JoinColumn (name = "ID_COMPRA")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ID_COMPRA")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ComprasModel idCompra;
 
-    @ManyToOne
-    @JoinColumn (name = "ID_PRODUCTO")
-    private ProductoModel id_Producto;
+    // ✅ CORREGIDO: Cambié id_Producto a idProducto para consistencia
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ID_PRODUCTO")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private ProductoModel idProducto;
 
-    @Column (name = "CANTIDAD", nullable = false)
+    @Column(name = "CANTIDAD", nullable = false)
     private long cantidad;
 
-
-    @Column (name = "COSTO_UNITARIO", nullable = false)
+    @Column(name = "COSTO_UNITARIO", nullable = false)
     private long costoUnitario;
 
-    @Column (name = "COSTO_TOTAL", nullable = false)
+    @Column(name = "COSTO_TOTAL", nullable = false)
     private long costoTotal;
-
 }
