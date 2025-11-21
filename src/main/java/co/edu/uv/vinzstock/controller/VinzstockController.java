@@ -1,13 +1,9 @@
 package co.edu.uv.vinzstock.controller;
 
 import co.edu.uv.vinzstock.dto.*;
-import co.edu.uv.vinzstock.model.InventarioModel;
-import co.edu.uv.vinzstock.model.ProductoModel;
-import co.edu.uv.vinzstock.model.RolesModel;
-import co.edu.uv.vinzstock.model.UsuarioModel;
+import co.edu.uv.vinzstock.model.*;
 import co.edu.uv.vinzstock.security.JwtUtil;
 import co.edu.uv.vinzstock.service.*;
-import co.edu.uv.vinzstock.model.ProveedoresModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +26,8 @@ public class VinzstockController {
     private final InventarioService inventarioService;
     private final JwtUtil jwtUtil;
     private final ProveedoresService proveedoresService;
+    private final ComprasService comprasService;
+    private final ProductosProveedoresService productosProveedoresService;
 
 
     @Autowired
@@ -39,13 +37,17 @@ public class VinzstockController {
             ProductoService productoService,
             InventarioService inventarioService,
             JwtUtil jwtUtil,
-            ProveedoresService proveedoresService
+            ProveedoresService proveedoresService,
+            ComprasService comprasService,                          // ✅ AGREGAR
+            ProductosProveedoresService productosProveedoresService
     ){
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.productoService = productoService;
         this.inventarioService = inventarioService;
         this.proveedoresService = proveedoresService;
+        this.comprasService = comprasService;                        // ✅ AGREGAR
+        this.productosProveedoresService = productosProveedoresService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -401,16 +403,42 @@ public class VinzstockController {
     // ========================================
     // ENDPOINTS DE COMPRAS
     // ========================================
-    @Autowired
-    private CompraService compraService;
 
-    @PostMapping("/compras/registrar")
-    public ResponseEntity<?> registrarCompra(@RequestBody CompraDTO dto) {
+
+    @PostMapping(path = "/compras/registrar")
+    public ResponseEntity<?> registrarCompra(@RequestBody CompraDTO compraDTO) {
         try {
-            compraService.registrarCompra(dto);
+            System.out.println("=== REGISTRANDO COMPRA ===");
+            System.out.println("Proveedor ID: " + compraDTO.getIdProveedor());
+            System.out.println("Detalles: " + compraDTO.getDetalles());
+
+            ComprasModel compra = comprasService.registrarCompra(compraDTO);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Compra registrada exitosamente");
+            response.put("data", compra);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        } catch (RuntimeException e) {
+            System.err.println("Error al registrar compra: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping(path = "/compras/all")
+    public ResponseEntity<?> findAllCompras() {
+        try {
+            List<ComprasModel> compras = comprasService.findAllCompras();
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "message", "Compra registrada correctamente"
+                    "data", compras,
+                    "total", compras.size()
             ));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
@@ -420,32 +448,64 @@ public class VinzstockController {
         }
     }
 
-    @GetMapping("/productos-proveedor/{idProveedor}")
-    public ResponseEntity<?> obtenerProductosPorProveedor(@PathVariable long idProveedor) {
+    @GetMapping(path = "/compras/{id}")
+    public ResponseEntity<?> findCompraById(@PathVariable Long id) {
         try {
-            List<ProductoDTO> productos = compraService.obtenerProductosPorProveedor(idProveedor);
+            ComprasModel compra = comprasService.findCompraById(id);
+            List<DetalleCompraModel> detalles = comprasService.findDetallesByCompra(id);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("data", productos);
-            response.put("total", productos.size());
+            response.put("compra", compra);
+            response.put("detalles", detalles);
 
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("message", "Error interno del servidor");
-            error.put("error", e.getMessage());
+    @GetMapping(path = "/compras/proveedor/{idProveedor}")
+    public ResponseEntity<?> findComprasByProveedor(@PathVariable Long idProveedor) {
+        try {
+            List<ComprasModel> compras = comprasService.findComprasByProveedor(idProveedor);
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", compras,
+                    "total", compras.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+
+    @GetMapping(path = "/productos/proveedor/{idProveedor}")
+    public ResponseEntity<?> findProductosByProveedor(@PathVariable Long idProveedor) {
+        try {
+            List<ProductoModel> productos = productosProveedoresService.findProductosByProveedor(idProveedor);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Productos encontrados: " + productos.size(),
+                    "data", productos,
+                    "total", productos.size()
+            ));
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
         }
     }
 
