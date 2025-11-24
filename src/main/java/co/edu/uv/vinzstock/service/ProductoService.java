@@ -1,10 +1,14 @@
 package co.edu.uv.vinzstock.service;
 
 
+import co.edu.uv.vinzstock.model.InventarioModel;
 import co.edu.uv.vinzstock.model.ProductoModel;
 import co.edu.uv.vinzstock.model.RolesModel;
 import co.edu.uv.vinzstock.model.UsuarioModel;
+import co.edu.uv.vinzstock.repository.InventarioRespository;
 import co.edu.uv.vinzstock.repository.ProductoRepository;
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +17,14 @@ import java.util.Optional;
 
 @Service
 public class ProductoService {
+
+    private final InventarioRespository inventarioRespository;
     private final ProductoRepository productoRepository;
 
     @Autowired
-    public ProductoService(ProductoRepository productoRepository){
+    public ProductoService(ProductoRepository productoRepository, InventarioRespository inventarioRespository){
         this.productoRepository = productoRepository;
+        this.inventarioRespository = inventarioRespository;
     }
 
 
@@ -42,6 +49,7 @@ public class ProductoService {
     /**
      * Crear producto
      */
+    @Transactional
     public ProductoModel createProducto(ProductoModel productoModel) {
         // Validar nombre duplicado
         if (productoRepository.existsByNombreIgnoreCase(productoModel.getNombre())) {
@@ -57,13 +65,26 @@ public class ProductoService {
         if (productoModel.getIva() < 0 || productoModel.getIva() > 100) {
             throw new RuntimeException("El IVA debe estar entre 0 y 100");
         }
+        // Guardar el producto
+        ProductoModel productoGuardado = productoRepository.save(productoModel);
+    
+        // Crear el inventario inicial con cantidad 0
+        InventarioModel inventario = InventarioModel.builder()
+                .producto(productoGuardado)
+                .cantidad(0L)
+                .build();
+    
+        inventarioRespository.save(inventario);
+    
+        return productoGuardado;
 
-        return productoRepository.save(productoModel);
+        
     }
 
     /**
      * Actualizar producto
      */
+    @Transactional
     public ProductoModel updateProducto(ProductoModel productoModel) {
         ProductoModel productoExistente = productoRepository.findById(productoModel.getIdProducto())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productoModel.getIdProducto()));
