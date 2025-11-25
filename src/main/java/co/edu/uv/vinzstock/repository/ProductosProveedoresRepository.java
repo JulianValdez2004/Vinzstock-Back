@@ -21,7 +21,7 @@ public interface ProductosProveedoresRepository extends JpaRepository<ProductosP
     // Verificar si existe la relación producto-proveedor
     boolean existsByIdProductoIdProductoAndIdProveedorIdProveedor(Long idProducto, Long idProveedor);
 
-    // ✅ Query para obtener solo los productos de un proveedor
+    // Query para obtener solo los productos de un proveedor
     @Query("SELECT pp.idProducto FROM ProductosProveedoresModel pp WHERE pp.idProveedor.idProveedor = :idProveedor")
     List<ProductoModel> findProductosByProveedorId(@Param("idProveedor") Long idProveedor);
 }

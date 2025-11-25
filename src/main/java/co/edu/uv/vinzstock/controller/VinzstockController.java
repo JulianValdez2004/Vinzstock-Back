@@ -28,7 +28,6 @@ public class VinzstockController {
     private final CompraService compraService;
     private final ProductosProveedoresService productosProveedoresService;
 
-
     @Autowired
     public VinzstockController(
             UsuarioService usuarioService,
@@ -37,15 +36,14 @@ public class VinzstockController {
             InventarioService inventarioService,
             JwtUtil jwtUtil,
             ProveedoresService proveedoresService,
-            CompraService compraService,                          // ✅ AGREGAR
-            ProductosProveedoresService productosProveedoresService
-    ){
+            CompraService compraService, // ✅ AGREGAR
+            ProductosProveedoresService productosProveedoresService) {
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.productoService = productoService;
         this.inventarioService = inventarioService;
         this.proveedoresService = proveedoresService;
-        this.compraService = compraService;                        // ✅ AGREGAR
+        this.compraService = compraService; // ✅ AGREGAR
         this.productosProveedoresService = productosProveedoresService;
         this.jwtUtil = jwtUtil;
     }
@@ -56,15 +54,13 @@ public class VinzstockController {
         try {
             UsuarioModel usuario = usuarioService.authenticateUsuario(
                     loginRequest.getUsername(),
-                    loginRequest.getPassword()
-            );
+                    loginRequest.getPassword());
 
             // Generar token JWT
             String token = jwtUtil.generateToken(
                     usuario.getUsuarioLogin(),
                     usuario.getIdUsuario(),
-                    usuario.getRol().getNombre()
-            );
+                    usuario.getRol().getNombre());
 
             // Crear DTO con la información del usuario
             UsuarioDTO usuarioDTO = new UsuarioDTO(
@@ -72,15 +68,13 @@ public class VinzstockController {
                     usuario.getNombre(),
                     usuario.getUsuarioLogin(),
                     usuario.getEmail(),
-                    usuario.getRol().getNombre()
-            );
+                    usuario.getRol().getNombre());
 
             LoginResponse response = new LoginResponse(
                     true,
                     "Login exitoso",
                     token,
-                    usuarioDTO
-            );
+                    usuarioDTO);
 
             return ResponseEntity.ok(response);
 
@@ -91,7 +85,7 @@ public class VinzstockController {
     }
 
     @PostMapping(path = "/save")
-    public ResponseEntity saveUsuario(@RequestBody UsuarioModel usuarioModel){
+    public ResponseEntity saveUsuario(@RequestBody UsuarioModel usuarioModel) {
         try {
             UsuarioModel nuevoUsuario = this.usuarioService.createUsuario(usuarioModel);
 
@@ -102,7 +96,7 @@ public class VinzstockController {
             response.put("data", nuevoUsuario);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch(RuntimeException e){
+        } catch (RuntimeException e) {
             // Capturar el error y devolverlo en formato JSON
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
@@ -123,7 +117,7 @@ public class VinzstockController {
             response.put("data", usuarioActualizado);
 
             return ResponseEntity.ok(response);
-        } catch(RuntimeException e){
+        } catch (RuntimeException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", e.getMessage());
@@ -133,17 +127,17 @@ public class VinzstockController {
     }
 
     @GetMapping(path = "/all")
-    public List<UsuarioModel> findAllUsuarios(){
+    public List<UsuarioModel> findAllUsuarios() {
         return this.usuarioService.findAllUsuarios();
     }
 
     @GetMapping(path = "/all/nombre")
-    public List<UsuarioModel> findAllUsuariosByNombre(@RequestParam(name="nombre") String nombre){
+    public List<UsuarioModel> findAllUsuariosByNombre(@RequestParam(name = "nombre") String nombre) {
         return this.usuarioService.findAllUsuariosByNombre(nombre);
     }
 
     @GetMapping(path = "/all/idusuario")
-    public List<UsuarioModel> findAllByIdUsuario(@RequestParam(name="idUsuario") long idUsuario){
+    public List<UsuarioModel> findAllByIdUsuario(@RequestParam(name = "idUsuario") long idUsuario) {
         return this.usuarioService.findAllByUsuarios(idUsuario);
     }
 
@@ -152,7 +146,7 @@ public class VinzstockController {
     // ========================================
 
     @GetMapping(path = "/roles/all")
-    public List<RolesModel> findAllRoles(){
+    public List<RolesModel> findAllRoles() {
         return this.rolService.findAllRoles();
     }
 
@@ -232,7 +226,7 @@ public class VinzstockController {
      * ✅ OBTENER TODOS LOS PRODUCTOS
      */
     @GetMapping(path = "/productos/all")
-    public ResponseEntity<List<ProductoModel>> findAllProductos(){
+    public ResponseEntity<List<ProductoModel>> findAllProductos() {
         List<ProductoModel> productos = this.productoService.findAllProductos();
         return ResponseEntity.ok(productos);
     }
@@ -270,10 +264,9 @@ public class VinzstockController {
     // ========================================
 
     @GetMapping(path = "/inventarios/all")
-    public List<InventarioModel> findAllInventarios(){
+    public List<InventarioModel> findAllInventarios() {
         return this.inventarioService.findAllInventarios();
     }
-
 
     // Endpoint para recuperación de contraseña
     @PostMapping("/recover-password")
@@ -304,14 +297,11 @@ public class VinzstockController {
         return ResponseEntity.ok(Map.of("message", "Se ha enviado un correo a " + email));
     }
 
-
-
-
     /*
-    ===PROVEEDORES===
-    */
+     * ===PROVEEDORES===
+     */
 
-    //Crear Proveedor
+    // Crear Proveedor
     @PostMapping("/proveedor/save")
     public ResponseEntity<?> saveProveedor(@RequestBody ProveedoresModel proveedor) {
         try {
@@ -320,17 +310,15 @@ public class VinzstockController {
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "Proveedor registrado exitosamente",
-                    "data", nuevo
-            ));
+                    "data", nuevo));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
-    //Actualizar Proveedor
+    // Actualizar Proveedor
     @PutMapping("/proveedor/update")
     public ResponseEntity<?> updateProveedor(@RequestBody ProveedoresModel proveedor) {
         try {
@@ -339,70 +327,68 @@ public class VinzstockController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Proveedor actualizado exitosamente",
-                    "data", actualizado
-            ));
+                    "data", actualizado));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
-
-    //Listar todos los proveedores:
+    // Listar todos los proveedores:
     @GetMapping("/proveedores/all")
     public ResponseEntity<List<ProveedoresModel>> findAllProveedores() {
         return ResponseEntity.ok(proveedoresService.findAllProveedores());
     }
 
-    //Obtener proveedor por id:
+    // Obtener proveedor por id:
     @GetMapping("/proveedor/{id}")
     public ResponseEntity<?> findProveedorById(@PathVariable long id) {
         try {
             return ResponseEntity.ok(
                     proveedoresService.findProveedorById(id)
-                            .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"))
-            );
+                            .orElseThrow(() -> new RuntimeException("Proveedor no encontrado")));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
-    //Buscar proovedores por nombre:
+    // Buscar proovedores por nombre:
     @GetMapping("/proveedor/search")
     public ResponseEntity<List<ProveedoresModel>> searchByNombre(@RequestParam String nombre) {
         return ResponseEntity.ok(proveedoresService.findByNombreContaining(nombre));
     }
 
-    /* Validar nombre
-    @GetMapping("/proveedor/validar/nombre/{nombre}")
-    public ResponseEntity<Boolean> validarNombre(@PathVariable String nombre) {
-        boolean disponible = !proveedoresService.existsByNombreCompania(nombre);
-        return ResponseEntity.ok(disponible);
-    }
-
-    // Validar email
-    @GetMapping("/proveedor/validar/email/{email}")
-    public ResponseEntity<Boolean> validarEmail(@PathVariable String email) {
-        boolean disponible = !proveedoresService.existsByEmail(email);
-        return ResponseEntity.ok(disponible);
-    }
-
-    // Validar NIT
-    @GetMapping("/proveedor/validar/nit/{nit}")
-    public ResponseEntity<Boolean> validarNit(@PathVariable String nit) {
-        boolean disponible = !proveedoresService.existsByNitFiscal(nit);
-        return ResponseEntity.ok(disponible);
-    }
-    */
+    /*
+     * Validar nombre
+     * 
+     * @GetMapping("/proveedor/validar/nombre/{nombre}")
+     * public ResponseEntity<Boolean> validarNombre(@PathVariable String nombre) {
+     * boolean disponible = !proveedoresService.existsByNombreCompania(nombre);
+     * return ResponseEntity.ok(disponible);
+     * }
+     * 
+     * // Validar email
+     * 
+     * @GetMapping("/proveedor/validar/email/{email}")
+     * public ResponseEntity<Boolean> validarEmail(@PathVariable String email) {
+     * boolean disponible = !proveedoresService.existsByEmail(email);
+     * return ResponseEntity.ok(disponible);
+     * }
+     * 
+     * // Validar NIT
+     * 
+     * @GetMapping("/proveedor/validar/nit/{nit}")
+     * public ResponseEntity<Boolean> validarNit(@PathVariable String nit) {
+     * boolean disponible = !proveedoresService.existsByNitFiscal(nit);
+     * return ResponseEntity.ok(disponible);
+     * }
+     */
     // ========================================
     // ENDPOINTS DE COMPRAS
     // ========================================
-
 
     @PostMapping(path = "/compras/registrar")
     public ResponseEntity<?> registrarCompra(@RequestBody CompraDTO compraDTO) {
@@ -424,8 +410,7 @@ public class VinzstockController {
             System.err.println("Error al registrar compra: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -437,13 +422,11 @@ public class VinzstockController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", compras,
-                    "total", compras.size()
-            ));
+                    "total", compras.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -463,11 +446,9 @@ public class VinzstockController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
-
 
     @GetMapping(path = "/compras/proveedor/{idProveedor}")
     public ResponseEntity<?> findComprasByProveedor(@PathVariable Long idProveedor) {
@@ -477,16 +458,13 @@ public class VinzstockController {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", compras,
-                    "total", compras.size()
-            ));
+                    "total", compras.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
-
 
     @GetMapping(path = "/productos/proveedor/{idProveedor}")
     public ResponseEntity<?> findProductosByProveedor(@PathVariable Long idProveedor) {
@@ -497,17 +475,145 @@ public class VinzstockController {
                     "success", true,
                     "message", "Productos encontrados: " + productos.size(),
                     "data", productos,
-                    "total", productos.size()
-            ));
+                    "total", productos.size()));
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
+        }
+    }
+    /**
+     * Obtener compras PENDIENTES de un proveedor
+     * GET /compras/proveedor/{idProveedor}/pendientes
+     * 
+     * Este es el endpoint principal para tu pantalla de historial
+     */
+    @GetMapping(path = "/compras/proveedor/{idProveedor}/pendientes")
+    public ResponseEntity<?> findComprasPendientesByProveedor(@PathVariable Long idProveedor) {
+        try {
+            System.out.println("📋 Consultando compras pendientes del proveedor: " + idProveedor);
+
+            List<CompraResponseDTO> compras = compraService.obtenerHistorialComprasPorProveedor(idProveedor);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Compras pendientes encontradas: " + compras.size(),
+                    "data", compras,
+                    "total", compras.size()));
+        } catch (RuntimeException e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
         }
     }
 
+    /**
+     * ✅ Confirmar recepción de una compra (actualiza inventario)
+     * PUT /compras/{idCompra}/confirmar
+     */
+    @PutMapping(path = "/compras/{idCompra}/confirmar")
+    public ResponseEntity<?> confirmarRecepcionCompra(@PathVariable Long idCompra) {
+        try {
+            System.out.println("✅ Confirmando recepción de compra: " + idCompra);
 
+            compraService.confirmarRecepcionCompra(idCompra);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Compra confirmada exitosamente. Inventario actualizado."));
+        } catch (RuntimeException e) {
+            System.err.println("❌ Error al confirmar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * ❌ Cancelar una compra
+     * PUT /compras/{idCompra}/cancelar
+     */
+    @PutMapping(path = "/compras/{idCompra}/cancelar")
+    public ResponseEntity<?> cancelarCompra(@PathVariable Long idCompra) {
+        try {
+            System.out.println("❌ Cancelando compra: " + idCompra);
+
+            compraService.cancelarCompra(idCompra);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Compra cancelada exitosamente"));
+        } catch (RuntimeException e) {
+            System.err.println("❌ Error al cancelar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 🗑️ Eliminar una compra completamente
+     * DELETE /compras/{idCompra}
+     */
+    @DeleteMapping(path = "/compras/{idCompra}")
+    public ResponseEntity<?> eliminarCompra(@PathVariable Long idCompra) {
+        try {
+            System.out.println("🗑️ Eliminando compra: " + idCompra);
+
+            compraService.eliminarCompra(idCompra);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Compra eliminada exitosamente"));
+        } catch (RuntimeException e) {
+            System.err.println("❌ Error al eliminar: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 🗑️ Borrar historial de compras pendientes de un proveedor
+     * DELETE /compras/proveedor/{idProveedor}/historial-pendiente
+     */
+    @DeleteMapping(path = "/compras/proveedor/{idProveedor}/historial-pendiente")
+    public ResponseEntity<?> borrarHistorialPendiente(@PathVariable Long idProveedor) {
+        try {
+            System.out.println("🗑️ Borrando historial pendiente del proveedor: " + idProveedor);
+
+            compraService.borrarHistorialCompleto(idProveedor);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Historial de compras pendientes eliminado exitosamente"));
+        } catch (RuntimeException e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
+    /**
+     * 📊 Obtener estadísticas de compras
+     * GET /compras/estadisticas
+     */
+    /*@GetMapping(path = "/compras/estadisticas")
+    public ResponseEntity<?> obtenerEstadisticasCompras() {
+        try {
+            CompraEstadisticasDTO stats = compraService.obtenerEstadisticas();
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", stats));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }*/
 
 }
