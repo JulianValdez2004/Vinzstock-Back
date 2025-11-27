@@ -10,4 +10,8 @@ import java.util.List;
 public interface InventarioRespository extends JpaRepository<InventarioModel, Long> {
 
     List<InventarioModel> findAllByIdInventario(long idInventario);
+    List<InventarioModel> findByCantidadLessThanEqual(long cantidad);
+    
+    int countByCantidadLessThanEqual(long cantidad);
 }
+

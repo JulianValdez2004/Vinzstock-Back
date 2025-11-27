@@ -27,6 +27,8 @@ public class VinzstockController {
     private final ProveedoresService proveedoresService;
     private final CompraService compraService;
     private final ProductosProveedoresService productosProveedoresService;
+    private final NotificacionService notificacionService;
+    
 
 
     @Autowired
@@ -38,7 +40,8 @@ public class VinzstockController {
             JwtUtil jwtUtil,
             ProveedoresService proveedoresService,
             CompraService compraService,                          // ✅ AGREGAR
-            ProductosProveedoresService productosProveedoresService
+            ProductosProveedoresService productosProveedoresService,
+            NotificacionService notificacionService
     ){
         this.usuarioService = usuarioService;
         this.rolService = rolService;
@@ -48,6 +51,7 @@ public class VinzstockController {
         this.compraService = compraService;                        // ✅ AGREGAR
         this.productosProveedoresService = productosProveedoresService;
         this.jwtUtil = jwtUtil;
+        this.notificacionService = notificacionService;
     }
 
     // ENDPOINT DE LOGIN CON JWT
@@ -506,6 +510,16 @@ public class VinzstockController {
                     "message", e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/inventario-bajo")
+    public ResponseEntity<List<String>> getNotificacionesInventarioBajo() {
+        return ResponseEntity.ok(notificacionService.obtenerNotificacionesInventarioBajo());
+    }
+    
+    @GetMapping("/inventario-bajo/count")
+    public ResponseEntity<Integer> getContadorNotificaciones() {
+        return ResponseEntity.ok(notificacionService.contarProductosBajos());
     }
 
 
