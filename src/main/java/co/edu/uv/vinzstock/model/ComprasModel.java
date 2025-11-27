@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -38,4 +39,7 @@ public class ComprasModel {
     @Column(name = "ESTADO", nullable = false, length = 20)
     @Builder.Default
     private String estado = "Pendiente"; // "Pendiente", "Recibido", "Cancelado"
+    
+    @OneToMany(mappedBy = "idCompra", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleCompraModel> detalles;
 }
