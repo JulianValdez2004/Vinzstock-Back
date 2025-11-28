@@ -9,6 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import co.edu.uv.vinzstock.dto.ProductoConInventarioDTO;
+import co.edu.uv.vinzstock.service.ProductoService;
+import co.edu.uv.vinzstock.service.PdfService;
+import org.springframework.http.*;
+
+import org.springframework.http.HttpHeaders;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +36,9 @@ public class VinzstockController {
     private final ProveedoresService proveedoresService;
     private final CompraService compraService;
     private final ProductosProveedoresService productosProveedoresService;
+    private final NotificacionService notificacionService;
+    private final PdfService pdfService;
+    
     private final ClienteService clienteService;
 
     @Autowired
@@ -39,6 +51,8 @@ public class VinzstockController {
             ProveedoresService proveedoresService,
             CompraService compraService, // ✅ AGREGAR
             ProductosProveedoresService productosProveedoresService,
+            NotificacionService notificacionService,
+            PdfService pdfService,
             ClienteService clienteService) {
         this.usuarioService = usuarioService;
         this.rolService = rolService;
@@ -49,6 +63,8 @@ public class VinzstockController {
         this.productosProveedoresService = productosProveedoresService;
         this.clienteService = clienteService;
         this.jwtUtil = jwtUtil;
+        this.notificacionService = notificacionService;
+        this.pdfService = pdfService;
     }
 
     // ENDPOINT DE LOGIN CON JWT
@@ -206,7 +222,7 @@ public class VinzstockController {
     /**
      * ✅ ELIMINAR PRODUCTO
      */
-    @DeleteMapping(path = "/producto/delete/{id}")
+    /*@DeleteMapping(path = "/producto/delete/{id}")
     public ResponseEntity<Map<String, Object>> deleteProducto(@PathVariable long id) {
         try {
             this.productoService.deleteProducto(id);
@@ -223,15 +239,14 @@ public class VinzstockController {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-    }
+    }*/
 
     /**
      * ✅ OBTENER TODOS LOS PRODUCTOS
      */
     @GetMapping(path = "/productos/all")
-    public ResponseEntity<List<ProductoModel>> findAllProductos() {
-        List<ProductoModel> productos = this.productoService.findAllProductos();
-        return ResponseEntity.ok(productos);
+    public ResponseEntity<List<ProductoConInventarioDTO>> getAllProductos()  {
+    return ResponseEntity.ok(productoService.getAllProductosConInventario());
     }
 
     /**
@@ -258,7 +273,7 @@ public class VinzstockController {
      */
     @GetMapping(path = "/producto/search")
     public ResponseEntity<List<ProductoModel>> searchProductos(@RequestParam String nombre) {
-        List<ProductoModel> productos = this.productoService.findByNombreContaining(nombre);
+        List<ProductoModel> productos = this.productoService.findAllProductosByNombre(nombre);
         return ResponseEntity.ok(productos);
     }
 
@@ -487,6 +502,44 @@ public class VinzstockController {
             ));
         }
     }
+
+    @GetMapping("/inventario-bajo")
+    public ResponseEntity<List<String>> getNotificacionesInventarioBajo() {
+        return ResponseEntity.ok(notificacionService.obtenerNotificacionesInventarioBajo());
+    }
+    
+    @GetMapping("/inventario-bajo/count")
+    public ResponseEntity<Integer> getContadorNotificaciones() {
+        return ResponseEntity.ok(notificacionService.contarProductosBajos());
+    }
+
+    @GetMapping("/productos/exportar-pdf")
+    public ResponseEntity<byte[]> exportarInventarioPdf() {
+        try {
+            List<ProductoConInventarioDTO> productos = productoService.getAllProductosConInventario();
+            byte[] pdfBytes = pdfService.generarReporteInventario(productos);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(
+                ContentDisposition.attachment()
+                    .filename("reporte_inventario_" + 
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + 
+                        ".pdf")
+                    .build()
+            );
+            
+            return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
+                
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+
 
     // ========================================
     // ENDPOINTS DE CLIENTES

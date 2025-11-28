@@ -30,4 +30,12 @@ public class ProductoModel {
     @Column (name = "IVA")
     private long iva;
 
+    @OneToOne(mappedBy = "producto")
+    private InventarioModel inventario;
+
+    @Transient
+    public Long getCantidadInventario() {
+        return inventario != null ? inventario.getCantidad() : 0L;
+    }
+
 }

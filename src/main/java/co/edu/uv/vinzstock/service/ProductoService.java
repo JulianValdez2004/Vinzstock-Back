@@ -1,6 +1,8 @@
 package co.edu.uv.vinzstock.service;
 
 
+import co.edu.uv.vinzstock.dto.ProductoConInventarioDTO;
+import co.edu.uv.vinzstock.dto.ProductoDTO;
 import co.edu.uv.vinzstock.model.InventarioModel;
 import co.edu.uv.vinzstock.model.ProductoModel;
 import co.edu.uv.vinzstock.model.RolesModel;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductoService {
@@ -141,7 +144,24 @@ public class ProductoService {
     /**
      * Buscar productos por nombre
      */
-    public List<ProductoModel> findByNombreContaining(String nombre) {
-        return productoRepository.findByNombreContainingIgnoreCase(nombre);
-    }
+    public List<ProductoConInventarioDTO> getAllProductosConInventario() {
+    List<ProductoModel> productos = productoRepository.findAll();
+    
+    return productos.stream()
+        .map(producto -> {
+            // Buscar el inventario del producto
+            InventarioModel inventario = inventarioRespository
+                .findByProducto(producto)
+                .orElse(null);
+            
+            return ProductoConInventarioDTO.builder()
+                .id(producto.getIdProducto())
+                .nombre(producto.getNombre())
+                .descripcion(producto.getDescripcion())
+                .precioVenta(producto.getPrecioVenta())
+                .iva(producto.getIva())
+                .cantidad(inventario != null ? inventario.getCantidad() : 0L).build();
+        })
+        .collect(Collectors.toList());
+}
 }
