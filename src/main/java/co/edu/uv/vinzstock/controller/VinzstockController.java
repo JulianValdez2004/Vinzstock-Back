@@ -27,6 +27,7 @@ public class VinzstockController {
     private final ProveedoresService proveedoresService;
     private final CompraService compraService;
     private final ProductosProveedoresService productosProveedoresService;
+    private final ClienteService clienteService;
 
 
     @Autowired
@@ -38,7 +39,8 @@ public class VinzstockController {
             JwtUtil jwtUtil,
             ProveedoresService proveedoresService,
             CompraService compraService,                          // ✅ AGREGAR
-            ProductosProveedoresService productosProveedoresService
+            ProductosProveedoresService productosProveedoresService,
+            ClienteService clienteService
     ){
         this.usuarioService = usuarioService;
         this.rolService = rolService;
@@ -47,6 +49,7 @@ public class VinzstockController {
         this.proveedoresService = proveedoresService;
         this.compraService = compraService;                        // ✅ AGREGAR
         this.productosProveedoresService = productosProveedoresService;
+        this.clienteService = clienteService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -508,6 +511,155 @@ public class VinzstockController {
         }
     }
 
+    // ========================================
+    // ENDPOINTS DE CLIENTES
+    // ========================================
+
+    @PostMapping("/cliente/save")
+    public ResponseEntity<?> saveCliente(@RequestBody ClienteModel cliente) {
+        try {
+            ClienteModel nuevo = clienteService.createCliente(cliente);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "El cliente " + nuevo.getNombreRazonSocial() + " fue guardado exitosamente.",
+                    "data", nuevo
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /*
+    * ✅ LISTAR TODOS LOS CLIENTES
+    */
+    @GetMapping("/clientes/all")
+    public ResponseEntity<?> findAllClientes() {
+        try {
+            List<ClienteModel> clientes = clienteService.findAllClientes();
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", clientes,
+                    "total", clientes.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /*
+    * ✅ OBTENER CLIENTE POR ID
+    */
+    @GetMapping("/cliente/{id}")
+    public ResponseEntity<?> findClienteById(@PathVariable long id) {
+        try {
+            ClienteModel cliente = clienteService.findClienteById(id)
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + id));
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", cliente
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /*
+     * ✅ BUSCAR CLIENTES POR NOMBRE
+     */
+    @GetMapping("/cliente/search")
+    public ResponseEntity<?> searchClienteByNombre(@RequestParam String nombre) {
+        try {
+            List<ClienteModel> clientes = clienteService.findByNombreContaining(nombre);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", clientes,
+                    "total", clientes.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /*
+     * ✅ BUSCAR CLIENTE POR NÚMERO DE DOCUMENTO
+     */
+    @GetMapping("/cliente/documento/{numeroDocumento}")
+    public ResponseEntity<?> findClienteByDocumento(@PathVariable String numeroDocumento) {
+        try {
+            ClienteModel cliente = clienteService.findByNumeroDocumento(numeroDocumento)
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado con documento: " + numeroDocumento));
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", cliente
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", "Cliente no encontrado"
+            ));
+        }
+    }
+
+    /*
+     * ✅ OBTENER CLIENTES ACTIVOS
+     */
+    @GetMapping("/clientes/activos")
+    public ResponseEntity<?> findClientesActivos() {
+        try {
+            List<ClienteModel> clientes = clienteService.findAllClientes()
+                    .stream()
+                    .filter(ClienteModel::isEstado)  // Filtra solo los activos (estado = true)
+                    .toList();
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", clientes,
+                    "total", clientes.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /*
+     * ✅ VERIFICAR SI EXISTE CLIENTE POR DOCUMENTO
+     */
+    @GetMapping("/cliente/existe/{numeroDocumento}")
+    public ResponseEntity<?> existeClientePorDocumento(@PathVariable String numeroDocumento) {
+        try {
+            boolean existe = clienteService.existsByNumeroDocumento(numeroDocumento);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "existe", existe
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
 
 
 }
