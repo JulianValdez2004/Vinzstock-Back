@@ -1,6 +1,7 @@
 package co.edu.uv.vinzstock.repository;
 
 
+import co.edu.uv.vinzstock.model.InventarioModel;
 import co.edu.uv.vinzstock.model.ProductoModel;
 import co.edu.uv.vinzstock.model.UsuarioModel;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +30,6 @@ public interface ProductoRepository extends JpaRepository <ProductoModel, Long> 
     Optional<ProductoModel> findByNombreIgnoreCase(String nombre);
 
     List<ProductoModel> findByNombreContainingIgnoreCase(String nombre);
+    
+
 }

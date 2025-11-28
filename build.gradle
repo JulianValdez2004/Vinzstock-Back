@@ -46,6 +46,12 @@ dependencies {
     //GMAIL
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+	// iText para generar PDFs
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'
+    
+    // Opcional: si necesitas soporte para fuentes y caracteres especiales
+    implementation 'com.itextpdf:itext-asian:5.2.0'
+
 }
 
 tasks.named('test') {
