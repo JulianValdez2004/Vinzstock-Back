@@ -1,5 +1,8 @@
 package co.edu.uv.vinzstock.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +23,7 @@ public class InventarioModel {
 
     @ManyToOne
     @JoinColumn (name = "ID_PRODUCTO")
+    @JsonBackReference
     private ProductoModel producto;
 
     @Column (name = "CANTIDAD")

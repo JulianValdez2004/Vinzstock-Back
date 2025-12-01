@@ -21,7 +21,7 @@ public class CompraService {
     private final DetalleCompraRepository detalleCompraRepository;
     private final ProveedoresRepository proveedoresRepository;
     private final ProductoRepository productoRepository;
-    private final InventarioRespository inventarioRepository;
+    private final InventarioRepository inventarioRepository;
 
     @Autowired
     public CompraService(
@@ -29,7 +29,7 @@ public class CompraService {
             DetalleCompraRepository detalleCompraRepository,
             ProveedoresRepository proveedoresRepository,
             ProductoRepository productoRepository,
-            InventarioRespository inventarioRepository) {
+            InventarioRepository inventarioRepository) {
         this.comprasRepository = comprasRepository;
         this.detalleCompraRepository = detalleCompraRepository;
         this.proveedoresRepository = proveedoresRepository;

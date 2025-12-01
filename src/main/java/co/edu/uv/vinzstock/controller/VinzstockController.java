@@ -494,6 +494,7 @@ public class VinzstockController {
                     "message", "Productos encontrados: " + productos.size(),
                     "data", productos,
                     "total", productos.size()));
+                    
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(

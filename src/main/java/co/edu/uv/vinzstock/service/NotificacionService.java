@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import co.edu.uv.vinzstock.model.InventarioModel;
-import co.edu.uv.vinzstock.repository.InventarioRespository;
+import co.edu.uv.vinzstock.repository.InventarioRepository;
 
 @Service
 public class NotificacionService {
     
     @Autowired
-    private InventarioRespository inventarioRepository;
+    private InventarioRepository inventarioRepository;
     
     private static final int UMBRAL_MINIMO = 5;
     

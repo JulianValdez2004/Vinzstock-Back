@@ -13,12 +13,13 @@ import java.util.Optional;
 import java.util.Optional;
 
 @Repository
-public interface InventarioRespository extends JpaRepository<InventarioModel, Long> {
+public interface InventarioRepository extends JpaRepository<InventarioModel, Long> {
 
 
     List<InventarioModel> findAllByIdInventario(long idInventario);
     List<InventarioModel> findByCantidadLessThanEqual(long cantidad);
-    
+  
+
     int countByCantidadLessThanEqual(long cantidad);
 
     Optional<InventarioModel> findByProducto(ProductoModel producto);

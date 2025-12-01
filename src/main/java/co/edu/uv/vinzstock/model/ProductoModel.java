@@ -1,6 +1,8 @@
 package co.edu.uv.vinzstock.model;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,6 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table (name = "TBL_PRODUCTOS")
+
 public class ProductoModel {
 
     @Id
@@ -30,12 +33,13 @@ public class ProductoModel {
     @Column (name = "IVA")
     private long iva;
 
-    @OneToOne(mappedBy = "producto")
+    /*@OneToOne(mappedBy = "producto", fetch = FetchType.EAGER)
+    @JsonManagedReference
     private InventarioModel inventario;
 
     @Transient
     public Long getCantidadInventario() {
         return inventario != null ? inventario.getCantidad() : 0L;
-    }
+    } */
 
 }

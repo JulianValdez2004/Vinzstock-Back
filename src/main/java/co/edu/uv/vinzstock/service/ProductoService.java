@@ -7,7 +7,7 @@ import co.edu.uv.vinzstock.model.InventarioModel;
 import co.edu.uv.vinzstock.model.ProductoModel;
 import co.edu.uv.vinzstock.model.RolesModel;
 import co.edu.uv.vinzstock.model.UsuarioModel;
-import co.edu.uv.vinzstock.repository.InventarioRespository;
+import co.edu.uv.vinzstock.repository.InventarioRepository;
 import co.edu.uv.vinzstock.repository.ProductoRepository;
 import jakarta.transaction.Transactional;
 
@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 @Service
 public class ProductoService {
 
-    private final InventarioRespository inventarioRespository;
+    private final InventarioRepository inventarioRespository;
     private final ProductoRepository productoRepository;
 
     @Autowired
-    public ProductoService(ProductoRepository productoRepository, InventarioRespository inventarioRespository){
+    public ProductoService(ProductoRepository productoRepository, InventarioRepository inventarioRespository){
         this.productoRepository = productoRepository;
         this.inventarioRespository = inventarioRespository;
     }
