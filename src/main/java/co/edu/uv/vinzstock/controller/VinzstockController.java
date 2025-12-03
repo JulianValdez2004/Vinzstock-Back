@@ -5,17 +5,9 @@ import co.edu.uv.vinzstock.model.*;
 import co.edu.uv.vinzstock.security.JwtUtil;
 import co.edu.uv.vinzstock.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
-import co.edu.uv.vinzstock.dto.ProductoConInventarioDTO;
-import co.edu.uv.vinzstock.service.ProductoService;
-import co.edu.uv.vinzstock.service.PdfService;
 import org.springframework.http.*;
 
-import org.springframework.http.HttpHeaders;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -38,6 +30,7 @@ public class VinzstockController {
     private final ProductosProveedoresService productosProveedoresService;
     private final NotificacionService notificacionService;
     private final PdfService pdfService;
+    private final TurnoService turnoService;
     
     private final ClienteService clienteService;
 
@@ -53,7 +46,9 @@ public class VinzstockController {
             ProductosProveedoresService productosProveedoresService,
             NotificacionService notificacionService,
             PdfService pdfService,
-            ClienteService clienteService) {
+            ClienteService clienteService,
+            TurnoService turnoService) 
+            {
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.productoService = productoService;
@@ -65,6 +60,7 @@ public class VinzstockController {
         this.jwtUtil = jwtUtil;
         this.notificacionService = notificacionService;
         this.pdfService = pdfService;
+        this.turnoService = turnoService;
     }
 
     // ENDPOINT DE LOGIN CON JWT
@@ -828,5 +824,117 @@ public class VinzstockController {
                     "message", e.getMessage()));
         }
     }*/
+    /*
+     * Verificar si un usuario tiene turno activo
+    */
+@GetMapping("/turno/activo/{idUsuario}")
+public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
+    try {
+        Optional<TurnoModel> turnoActivo = turnoService.obtenerTurnoActivo(idUsuario);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        
+        if (turnoActivo.isPresent()) {
+            response.put("tieneTurnoActivo", true);
+            response.put("turno", turnoActivo.get());
+        } else {
+            response.put("tieneTurnoActivo", false);
+            response.put("turno", null);  // ✅ Ahora sí acepta null
+        }
+        
+        return ResponseEntity.ok(response);
+        
+    } catch (RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+        ));
+    }
+}
+
+    /**
+     * Abrir un nuevo turno
+     */
+    @PostMapping("/turno/abrir")
+    public ResponseEntity<?> abrirTurno(@RequestBody TurnoDTO.AbrirTurnoDTO dto) {
+        try {
+            TurnoModel turno = turnoService.abrirTurno(dto);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "Turno abierto exitosamente",
+                    "data", turno
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Cerrar turno
+     */
+    @PutMapping("/turno/cerrar")
+    public ResponseEntity<?> cerrarTurno(@RequestBody TurnoDTO.CerrarTurnoDTO dto) {
+        try {
+            TurnoModel turno = turnoService.cerrarTurno(dto);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Turno cerrado exitosamente",
+                    "data", turno
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Obtener historial de turnos de un usuario
+     */
+    @GetMapping("/turnos/usuario/{idUsuario}")
+    public ResponseEntity<?> obtenerHistorialTurnos(@PathVariable long idUsuario) {
+        try {
+            List<TurnoModel> turnos = turnoService.obtenerHistorialTurnos(idUsuario);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", turnos,
+                    "total", turnos.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Obtener turno por ID
+     */
+    @GetMapping("/turno/{idTurno}")
+    public ResponseEntity<?> obtenerTurnoPorId(@PathVariable long idTurno) {
+        try {
+            TurnoModel turno = turnoService.obtenerTurnoPorId(idTurno)
+                    .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", turno
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }    
 
 }
