@@ -119,7 +119,7 @@ public class TurnoService {
      */
     private double calcularTotalVentas(TurnoModel turno) {
         String sql = """
-            SELECT COALESCE(SUM(v.valor_total), 0) 
+            SELECT COALESCE(SUM(v.valor_venta), 0) 
             FROM tbl_ventas v 
             WHERE v.id_usuario = ? 
               AND (v.fecha + v.hora) >= ? 
