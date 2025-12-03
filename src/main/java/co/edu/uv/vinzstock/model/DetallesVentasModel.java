@@ -9,23 +9,23 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "TBL_DETALLES_COMPRAS")
-public class DetalleCompraModel {
+@Table(name = "TBL_DETALLES_VENTAS")
+public class DetallesVentasModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID_DETALLE_COMPRA", unique = true)
-    private long idDetalleCompra;
+    @Column(name = "ID_DETALLE_VENTA", unique = true)
+    private long idDetalleVenta;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ID_COMPRA")
+    @JoinColumn(name = "ID_VENTA")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private ComprasModel idCompra;
+    private VentasModel venta;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_PRODUCTO")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private ProductoModel idProducto;
+    private ProductoModel producto;
 
     @Column(name = "CANTIDAD", nullable = false)
     private long cantidad;
