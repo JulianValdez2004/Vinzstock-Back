@@ -5,9 +5,11 @@ import co.edu.uv.vinzstock.model.*;
 import co.edu.uv.vinzstock.security.JwtUtil;
 import co.edu.uv.vinzstock.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public class VinzstockController {
     private final NotificacionService notificacionService;
     private final PdfService pdfService;
     private final TurnoService turnoService;
-    
+
     private final ClienteService clienteService;
 
     @Autowired
@@ -50,8 +52,7 @@ public class VinzstockController {
             PdfService pdfService,
             ClienteService clienteService,
             TurnoService turnoService,
-            VentasService ventasService) 
-            {
+            VentasService ventasService) {
         this.usuarioService = usuarioService;
         this.rolService = rolService;
         this.productoService = productoService;
@@ -222,31 +223,34 @@ public class VinzstockController {
     /**
      * ✅ ELIMINAR PRODUCTO
      */
-    /*@DeleteMapping(path = "/producto/delete/{id}")
-    public ResponseEntity<Map<String, Object>> deleteProducto(@PathVariable long id) {
-        try {
-            this.productoService.deleteProducto(id);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Producto eliminado exitosamente");
-
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("success", false);
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }*/
+    /*
+     * @DeleteMapping(path = "/producto/delete/{id}")
+     * public ResponseEntity<Map<String, Object>> deleteProducto(@PathVariable long
+     * id) {
+     * try {
+     * this.productoService.deleteProducto(id);
+     * 
+     * Map<String, Object> response = new HashMap<>();
+     * response.put("success", true);
+     * response.put("message", "Producto eliminado exitosamente");
+     * 
+     * return ResponseEntity.ok(response);
+     * } catch (RuntimeException e) {
+     * Map<String, Object> errorResponse = new HashMap<>();
+     * errorResponse.put("success", false);
+     * errorResponse.put("message", e.getMessage());
+     * 
+     * return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+     * }
+     * }
+     */
 
     /**
      * ✅ OBTENER TODOS LOS PRODUCTOS
      */
     @GetMapping(path = "/productos/all")
-    public ResponseEntity<List<ProductoConInventarioDTO>> getAllProductos()  {
-    return ResponseEntity.ok(productoService.getAllProductosConInventario());
+    public ResponseEntity<List<ProductoConInventarioDTO>> getAllProductos() {
+        return ResponseEntity.ok(productoService.getAllProductosConInventario());
     }
 
     /**
@@ -494,13 +498,11 @@ public class VinzstockController {
                     "message", "Productos encontrados: " + productos.size(),
                     "data", productos,
                     "total", productos.size()));
-                    
 
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -508,7 +510,7 @@ public class VinzstockController {
     public ResponseEntity<List<String>> getNotificacionesInventarioBajo() {
         return ResponseEntity.ok(notificacionService.obtenerNotificacionesInventarioBajo());
     }
-    
+
     @GetMapping("/inventario-bajo/count")
     public ResponseEntity<Integer> getContadorNotificaciones() {
         return ResponseEntity.ok(notificacionService.contarProductosBajos());
@@ -519,28 +521,24 @@ public class VinzstockController {
         try {
             List<ProductoConInventarioDTO> productos = productoService.getAllProductosConInventario();
             byte[] pdfBytes = pdfService.generarReporteInventario(productos);
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDisposition(
-                ContentDisposition.attachment()
-                    .filename("reporte_inventario_" + 
-                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + 
-                        ".pdf")
-                    .build()
-            );
-            
+                    ContentDisposition.attachment()
+                            .filename("reporte_inventario_" +
+                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) +
+                                    ".pdf")
+                            .build());
+
             return ResponseEntity.ok()
-                .headers(headers)
-                .body(pdfBytes);
-                
+                    .headers(headers)
+                    .body(pdfBytes);
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
-
 
     // ========================================
     // ENDPOINTS DE CLIENTES
@@ -554,40 +552,36 @@ public class VinzstockController {
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "El cliente " + nuevo.getNombreRazonSocial() + " fue guardado exitosamente.",
-                    "data", nuevo
-            ));
+                    "data", nuevo));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
     /*
-    * ✅ LISTAR TODOS LOS CLIENTES
-    */
+     * ✅ LISTAR TODOS LOS CLIENTES
+     */
     @GetMapping("/clientes/all")
     public ResponseEntity<?> findAllClientes() {
         try {
             List<ClienteModel> clientes = clienteService.findAllClientes();
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", clientes,
-                    "total", clientes.size()
-            ));
+                    "total", clientes.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
     /*
-    * ✅ OBTENER CLIENTE POR ID
-    */
+     * ✅ OBTENER CLIENTE POR ID
+     */
     @GetMapping("/cliente/{id}")
     public ResponseEntity<?> findClienteById(@PathVariable long id) {
         try {
@@ -596,13 +590,11 @@ public class VinzstockController {
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "data", cliente
-            ));
+                    "data", cliente));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -613,17 +605,15 @@ public class VinzstockController {
     public ResponseEntity<?> searchClienteByNombre(@RequestParam String nombre) {
         try {
             List<ClienteModel> clientes = clienteService.findByNombreContaining(nombre);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", clientes,
-                    "total", clientes.size()
-            ));
+                    "total", clientes.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -638,13 +628,11 @@ public class VinzstockController {
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "data", cliente
-            ));
+                    "data", cliente));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", "Cliente no encontrado"
-            ));
+                    "message", "Cliente no encontrado"));
         }
     }
 
@@ -656,19 +644,17 @@ public class VinzstockController {
         try {
             List<ClienteModel> clientes = clienteService.findAllClientes()
                     .stream()
-                    .filter(ClienteModel::isEstado)  // Filtra solo los activos (estado = true)
+                    .filter(ClienteModel::isEstado) // Filtra solo los activos (estado = true)
                     .toList();
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", clientes,
-                    "total", clientes.size()
-            ));
+                    "total", clientes.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -679,22 +665,16 @@ public class VinzstockController {
     public ResponseEntity<?> existeClientePorDocumento(@PathVariable String numeroDocumento) {
         try {
             boolean existe = clienteService.existsByNumeroDocumento(numeroDocumento);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "existe", existe
-            ));
+                    "existe", existe));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
-
-    
-        
-    
 
     /**
      * Obtener compras PENDIENTES de un proveedor
@@ -814,48 +794,49 @@ public class VinzstockController {
      * 📊 Obtener estadísticas de compras
      * GET /compras/estadisticas
      */
-    /*@GetMapping(path = "/compras/estadisticas")
-    public ResponseEntity<?> obtenerEstadisticasCompras() {
+    /*
+     * @GetMapping(path = "/compras/estadisticas")
+     * public ResponseEntity<?> obtenerEstadisticasCompras() {
+     * try {
+     * CompraEstadisticasDTO stats = compraService.obtenerEstadisticas();
+     * 
+     * return ResponseEntity.ok(Map.of(
+     * "success", true,
+     * "data", stats));
+     * } catch (Exception e) {
+     * return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+     * "success", false,
+     * "message", e.getMessage()));
+     * }
+     * }
+     */
+    /*
+     * Verificar si un usuario tiene turno activo
+     */
+    @GetMapping("/turno/activo/{idUsuario}")
+    public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
         try {
-            CompraEstadisticasDTO stats = compraService.obtenerEstadisticas();
+            Optional<TurnoModel> turnoActivo = turnoService.obtenerTurnoActivo(idUsuario);
 
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "data", stats));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+
+            if (turnoActivo.isPresent()) {
+                response.put("tieneTurnoActivo", true);
+                response.put("turno", turnoActivo.get());
+            } else {
+                response.put("tieneTurnoActivo", false);
+                response.put("turno", null); // ✅ Ahora sí acepta null
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
                     "message", e.getMessage()));
         }
-    }*/
-    /*
-     * Verificar si un usuario tiene turno activo
-    */
-@GetMapping("/turno/activo/{idUsuario}")
-public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
-    try {
-        Optional<TurnoModel> turnoActivo = turnoService.obtenerTurnoActivo(idUsuario);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        
-        if (turnoActivo.isPresent()) {
-            response.put("tieneTurnoActivo", true);
-            response.put("turno", turnoActivo.get());
-        } else {
-            response.put("tieneTurnoActivo", false);
-            response.put("turno", null);  // ✅ Ahora sí acepta null
-        }
-        
-        return ResponseEntity.ok(response);
-        
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                "success", false,
-                "message", e.getMessage()
-        ));
     }
-}
 
     /**
      * Abrir un nuevo turno
@@ -864,17 +845,15 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
     public ResponseEntity<?> abrirTurno(@RequestBody TurnoDTO.AbrirTurnoDTO dto) {
         try {
             TurnoModel turno = turnoService.abrirTurno(dto);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "Turno abierto exitosamente",
-                    "data", turno
-            ));
+                    "data", turno));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -885,17 +864,15 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
     public ResponseEntity<?> cerrarTurno(@RequestBody TurnoDTO.CerrarTurnoDTO dto) {
         try {
             TurnoModel turno = turnoService.cerrarTurno(dto);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Turno cerrado exitosamente",
-                    "data", turno
-            ));
+                    "data", turno));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -906,17 +883,15 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
     public ResponseEntity<?> obtenerHistorialTurnos(@PathVariable long idUsuario) {
         try {
             List<TurnoModel> turnos = turnoService.obtenerHistorialTurnos(idUsuario);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", turnos,
-                    "total", turnos.size()
-            ));
+                    "total", turnos.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -928,19 +903,17 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
         try {
             TurnoModel turno = turnoService.obtenerTurnoPorId(idTurno)
                     .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "data", turno
-            ));
+                    "data", turno));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
-    } 
-    
+    }
+
     @PostMapping("/ventas/registrar")
     public ResponseEntity<?> registrarVenta(@RequestBody VentaDTO ventaDTO) {
         try {
@@ -948,13 +921,11 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "Venta registrada exitosamente",
-                    "data", venta
-            ));
+                    "data", venta));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -965,13 +936,11 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", ventas,
-                    "total", ventas.size()
-            ));
+                    "total", ventas.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -984,13 +953,11 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "venta", venta,
-                    "detalles", detalles
-            ));
+                    "detalles", detalles));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -1001,13 +968,11 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", ventas,
-                    "total", ventas.size()
-            ));
+                    "total", ventas.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
@@ -1018,14 +983,74 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", ventas,
-                    "total", ventas.size()
-            ));
+                    "total", ventas.size()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "success", false,
-                    "message", e.getMessage()
-            ));
+                    "message", e.getMessage()));
         }
     }
 
+    /*endpoints listas ventas */
+    
+    @GetMapping("/ventas/dia")
+    public ResponseEntity<?> getVentasDelDia() {
+        try {
+            List<VentasModel> ventas = ventasService.getVentasDelDia();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", ventas,
+                    "total", ventas.size()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/ventas/rango")
+    public ResponseEntity<?> getVentasPorRangoFechas(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        try {
+            List<VentasModel> ventas = ventasService.getVentasPorRangoFechas(fechaInicio, fechaFin);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", ventas,
+                    "total", ventas.size(),
+                    "fechaInicio", fechaInicio,
+                    "fechaFin", fechaFin));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/ventas/cliente/buscar")
+    public ResponseEntity<?> findVentasByClienteYRangoFechas(
+            @RequestParam String busqueda,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+        try {
+            List<VentasModel> ventas = ventasService.findVentasByClienteYRangoFechas(
+                    busqueda, fechaInicio, fechaFin);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", ventas);
+            response.put("total", ventas.size());
+            response.put("busqueda", busqueda);
+            if (fechaInicio != null)
+                response.put("fechaInicio", fechaInicio);
+            if (fechaFin != null)
+                response.put("fechaFin", fechaFin);
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()));
+        }
+    }
 }

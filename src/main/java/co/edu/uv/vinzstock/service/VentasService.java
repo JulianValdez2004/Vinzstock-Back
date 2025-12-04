@@ -1,5 +1,6 @@
 package co.edu.uv.vinzstock.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,23 +28,19 @@ public class VentasService {
     private final ProductoRepository productoRepository;
     private final InventarioRepository inventarioRepository;
 
-
-
     @Autowired
-    public VentasService(VentasRepository ventasRepository, DetallesVentasRepository detallesVentasRepository, 
-        UsuarioRepository usuarioRepository, ClienteRepository clienteRepository, ProductoRepository productoRepository, InventarioRepository inventarioRepository){
-        
+    public VentasService(VentasRepository ventasRepository, DetallesVentasRepository detallesVentasRepository,
+            UsuarioRepository usuarioRepository, ClienteRepository clienteRepository,
+            ProductoRepository productoRepository, InventarioRepository inventarioRepository) {
+
         this.ventasRepository = ventasRepository;
         this.detallesVentasRepository = detallesVentasRepository;
         this.usuarioRepository = usuarioRepository;
         this.clienteRepository = clienteRepository;
         this.productoRepository = productoRepository;
         this.inventarioRepository = inventarioRepository;
-  
 
     }
-
-
 
     /**
      * Registrar una venta completa con sus detalles
@@ -69,11 +66,12 @@ public class VentasService {
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + detalle.getIdProducto()));
 
             InventarioModel inventario = inventarioRepository.findByProducto(producto)
-                    .orElseThrow(() -> new RuntimeException("No hay inventario para el producto: " + producto.getNombre()));
+                    .orElseThrow(
+                            () -> new RuntimeException("No hay inventario para el producto: " + producto.getNombre()));
 
             if (inventario.getCantidad() < detalle.getCantidad()) {
-                throw new RuntimeException("Stock insuficiente para " + producto.getNombre() + 
-                    ". Disponible: " + inventario.getCantidad() + ", Solicitado: " + detalle.getCantidad());
+                throw new RuntimeException("Stock insuficiente para " + producto.getNombre() +
+                        ". Disponible: " + inventario.getCantidad() + ", Solicitado: " + detalle.getCantidad());
             }
         }
 
@@ -147,5 +145,52 @@ public class VentasService {
         return ventasRepository.findByClienteIdCliente(idCliente);
     }
 
+    /* implementacion lista ventas */
+
+    /* Obtener ventas del día actual */
+    public List<VentasModel> getVentasDelDia() {
+        LocalDate hoy = LocalDate.now();
+        return ventasRepository.findVentasDelDiaOrdenadas(hoy);
+    }
+
+    /* Obtener ventas en un rango de fechas */
+    public List<VentasModel> getVentasPorRangoFechas(LocalDate fechaInicio, LocalDate fechaFin) {
+        validarRangoFechas(fechaInicio, fechaFin);
+        return ventasRepository.findByFechaBetween(fechaInicio, fechaFin);
+    }
+
+    /* Buscar ventas por cliente con fechas opcionales
+     * - Si hay fechas: busca con rango de fechas
+     * - Si no hay fechas: busca todas las ventas del cliente */
+    public List<VentasModel> findVentasByClienteYRangoFechas(
+            String busqueda,
+            LocalDate fechaInicio,
+            LocalDate fechaFin) {
+
+        if (busqueda == null || busqueda.trim().isEmpty()) {
+            throw new RuntimeException("Debes ingresar un nombre o razón social para buscar");
+        }
+
+        // Si ambas fechas están presentes, buscar con rango
+        if (fechaInicio != null && fechaFin != null) {
+            validarRangoFechas(fechaInicio, fechaFin);
+            return ventasRepository.findByClienteNombreOEmpresaYRangoFechas(
+                    busqueda.trim(), fechaInicio, fechaFin);
+        }
+
+        // Si no hay fechas, buscar solo por cliente (todas las ventas)
+        return ventasRepository.findByClienteNombreOEmpresa(busqueda.trim());
+    }
+
+    /* Validar que el rango de fechas sea correcto */
+    private void validarRangoFechas(LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaInicio == null || fechaFin == null) {
+            throw new RuntimeException("Las fechas de inicio y fin son obligatorias");
+        }
+
+        if (fechaInicio.isAfter(fechaFin)) {
+            throw new RuntimeException("La fecha de inicio no puede ser posterior a la fecha final");
+        }
+    }
 
 }
