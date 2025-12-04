@@ -1,6 +1,8 @@
 package co.edu.uv.vinzstock.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import co.edu.uv.vinzstock.model.DetallesVentasModel;
@@ -12,6 +14,7 @@ public interface DetallesVentasRepository extends JpaRepository <DetallesVentasM
 
 
     List<DetallesVentasModel> findByProductoIdProducto(Long idProducto);
-    List<DetallesVentasModel> findByVentaIdVenta(Long idVenta);
-
+    
+    @Query("SELECT d FROM DetallesVentasModel d WHERE d.venta.idVenta = :idVenta")
+    List<DetallesVentasModel> findByVentaIdVenta(@Param("idVenta") Long idVenta);
 }

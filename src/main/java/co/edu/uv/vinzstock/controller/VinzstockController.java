@@ -20,6 +20,8 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:5173")
 public class VinzstockController {
 
+    private final VentasService ventasService;
+
     private final UsuarioService usuarioService;
     private final RolService rolService;
     private final ProductoService productoService;
@@ -47,7 +49,8 @@ public class VinzstockController {
             NotificacionService notificacionService,
             PdfService pdfService,
             ClienteService clienteService,
-            TurnoService turnoService) 
+            TurnoService turnoService,
+            VentasService ventasService) 
             {
         this.usuarioService = usuarioService;
         this.rolService = rolService;
@@ -61,6 +64,7 @@ public class VinzstockController {
         this.notificacionService = notificacionService;
         this.pdfService = pdfService;
         this.turnoService = turnoService;
+        this.ventasService = ventasService;
     }
 
     // ENDPOINT DE LOGIN CON JWT
@@ -935,6 +939,93 @@ public ResponseEntity<?> verificarTurnoActivo(@PathVariable long idUsuario) {
                     "message", e.getMessage()
             ));
         }
-    }    
+    } 
+    
+    @PostMapping("/ventas/registrar")
+    public ResponseEntity<?> registrarVenta(@RequestBody VentaDTO ventaDTO) {
+        try {
+            VentasModel venta = ventasService.registrarVenta(ventaDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "Venta registrada exitosamente",
+                    "data", venta
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/ventas/all")
+    public ResponseEntity<?> findAllVentas() {
+        try {
+            List<VentasModel> ventas = ventasService.findAllVentas();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", ventas,
+                    "total", ventas.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/ventas/{id}")
+    public ResponseEntity<?> findVentaById(@PathVariable Long id) {
+        try {
+            VentasModel venta = ventasService.findVentaById(id);
+            List<DetallesVentasModel> detalles = ventasService.findDetallesByVenta(id);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "venta", venta,
+                    "detalles", detalles
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/ventas/usuario/{idUsuario}")
+    public ResponseEntity<?> findVentasByUsuario(@PathVariable Long idUsuario) {
+        try {
+            List<VentasModel> ventas = ventasService.findVentasByUsuario(idUsuario);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", ventas,
+                    "total", ventas.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    @GetMapping("/ventas/cliente/{idCliente}")
+    public ResponseEntity<?> findVentasByCliente(@PathVariable Long idCliente) {
+        try {
+            List<VentasModel> ventas = ventasService.findVentasByCliente(idCliente);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", ventas,
+                    "total", ventas.size()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        }
+    }
 
 }
